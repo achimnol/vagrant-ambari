@@ -6,5 +6,6 @@ config = ConfigParser.RawConfigParser()
 config.read(ambari_conf)
 if not config.has_option('agent', 'hostname_script'):
     config.set('agent', 'hostname_script', 'hostname')
-    with open(ambari_conf, 'wb') as f:
-        config.write(f)
+config.set('server', 'hostname', 'master')
+with open(ambari_conf, 'wb') as f:
+    config.write(f)

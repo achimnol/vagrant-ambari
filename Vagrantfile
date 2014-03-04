@@ -19,7 +19,7 @@ ambari-agent start
 SCRIPT
 
 $hosts_init_script = <<SCRIPT
-echo "" > /etc/hosts
+echo -n "" > /etc/hosts
 while [ "$1" != "" ]; do
   hostname=$1
   shift
@@ -39,7 +39,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     host_ip_list.push("node#{i}")
     host_ip_list.push("192.168.33.#{i+100}")
   end
-  FileUtils.cp(File.expand_path("~/.vagrant.d/insecure_private_key"), "insecure-host-key")
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.define :master, primary: true do |master_conf|
@@ -52,9 +51,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ["modifyvm", :id, "--memory", "4096"]
       vb.customize ["modifyvm", :id, "--name", vmname]
     end
-    master_conf.vm.provision "shell", inline: "mkdir -p /root/.ssh; cp /vagrant/insecure-host-key /root/.ssh/id_rsa; chmod 600 /root/.ssh/id_rsa"
-    master_conf.vm.provision "shell", inline: $repository_init_script
     master_conf.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
+    master_conf.vm.provision "shell", inline: $repository_init_script
     # Automatic server setup!
     master_conf.vm.provision "shell", inline: "yum install -y ambari-server"
     master_conf.vm.provision "shell", inline: "expect /vagrant/ambari_server_init.expect"
@@ -70,8 +68,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--memory", "4096"]
         vb.customize ["modifyvm", :id, "--name", vmname]
       end
-      node_conf.vm.provision "shell", inline: $repository_init_script
       node_conf.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
+      node_conf.vm.provision "shell", inline: $repository_init_script
     end
   end
 
