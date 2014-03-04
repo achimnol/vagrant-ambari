@@ -1,0 +1,16 @@
+#! /usr/bin/env expect
+set timeout 10
+spawn ambari-server setup
+sleep 0.5
+expect {
+  -re "Customize user account for ambari-server daemon" { send "n\r" }
+  -re "run under user 'root'. Change this setting" { send "n\r" }
+}
+expect {
+  -re "Do you accept the Oracle Binary Code License Agreement" { send "y\r" }
+  -re "Would you like to re-download the JDK" { send "y\r" }
+  -re "JCE Policy archive already exists" { exp_continue }
+}
+set timeout 1200
+expect -re "Enter advanced database configuration" { send "n\r" }
+interact

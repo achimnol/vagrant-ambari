@@ -3,18 +3,22 @@
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
-NUM_NODES = 2  # except the master
 
-repository_init_script = <<SCRIPT
-yum install -y wget
+# The number of nodes except the master
+# (# total deployed VMs = NUM_NODES + 1)
+NUM_NODES = 2
+
+$repository_init_script = <<SCRIPT
+yum install -y wget expect
 cd /etc/yum.repos.d/
 wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.4.4.23/ambari.repo
-yum install ambari-agent
+yum install -y ambari-agent
 cd /vagrant
 python ambari_agent_init.py
+ambari-agent start
 SCRIPT
 
-hosts_init_script = <<SCRIPT
+$hosts_init_script = <<SCRIPT
 while [ "$1" != "" ]; do
   hostname=$1
   shift
@@ -34,6 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     host_ip_list.push("node#{i}")
     host_ip_list.push("192.168.33.#{i+100}")
   end
+  FileUtils.cp(File.expand_path("~/.vagrant.d/insecure_private_key"), "insecure-host-key")
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.define :master, primary: true do |master_conf|
@@ -46,11 +51,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ["modifyvm", :id, "--memory", "4096"]
       vb.customize ["modifyvm", :id, "--name", vmname]
     end
-    master_conf.vm.provision "shell" inline: repository_init_script
-    master_conf.vm.provision "shell" do |s|
-      s.inline = hosts_init_script
-      s.args = host_ip_list
-    end
+    master_conf.vm.provision "shell", inline: "mkdir -p /root/.ssh; cp /vagrant/insecure-host-key /root/.ssh/id_rsa; chmod 600 /root/.ssh/id_rsa"
+    master_conf.vm.provision "shell", inline: $repository_init_script
+    master_conf.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
+    # Automatic server setup!
+    master_conf.vm.provision "shell", inline: "yum install -y ambari-server"
+    master_conf.vm.provision "shell", inline: "expect /vagrant/ambari_server_init.expect"
   end
 
   (1..NUM_NODES).each do |i|
@@ -63,11 +69,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--memory", "4096"]
         vb.customize ["modifyvm", :id, "--name", vmname]
       end
-      node_conf.vm.provision "shell" inline: repository_init_script
-      node_conf.vm.provision "shell" do |s|
-        s.inline = hosts_init_script
-        s.args = host_ip_list
-      end
+      node_conf.vm.provision "shell", inline: $repository_init_script
+      node_conf.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
     end
   end
 
