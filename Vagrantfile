@@ -12,6 +12,7 @@ $repository_init_script = <<SCRIPT
 yum install -y wget expect
 cd /etc/yum.repos.d/
 wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.4.4.23/ambari.repo
+yum repolist
 yum install -y ambari-agent
 cd /vagrant
 python ambari_agent_init.py
