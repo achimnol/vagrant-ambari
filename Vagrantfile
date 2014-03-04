@@ -19,6 +19,7 @@ ambari-agent start
 SCRIPT
 
 $hosts_init_script = <<SCRIPT
+echo "" > /etc/hosts
 while [ "$1" != "" ]; do
   hostname=$1
   shift
@@ -33,7 +34,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
 
-  host_ip_list = ["master", "192.168.33.100"]
+  host_ip_list = ["localhost", "127.0.0.1", "master", "192.168.33.100"]
   (1..NUM_NODES).each do |i|
     host_ip_list.push("node#{i}")
     host_ip_list.push("192.168.33.#{i+100}")

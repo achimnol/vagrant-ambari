@@ -1,5 +1,5 @@
 #! /usr/bin/env expect
-set timeout 10
+set timeout -1
 spawn ambari-server setup
 sleep 0.5
 expect {
@@ -9,8 +9,9 @@ expect {
 expect {
   -re "Do you accept the Oracle Binary Code License Agreement" { send "y\r" }
   -re "Would you like to re-download the JDK" { send "y\r" }
-  -re "JCE Policy archive already exists" { exp_continue }
+  -re "JCE Policy archive already exists" { }
 }
-set timeout 1200
-expect -re "Enter advanced database configuration" { send "n\r" }
+expect {
+  -re "Enter advanced database configuration" { send "n\r" }
+}
 interact
