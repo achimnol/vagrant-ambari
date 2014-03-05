@@ -41,18 +41,54 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     host_ip_list.push("192.168.33.#{i+100}")
   end
 
+  virtual_netconfig = lambda do |net, ip, fwdports|
+    net.vm.network "private_network", ip: ip
+    for fwd in fwdports do
+      net.vm.network "forwarded_port", id: fwd[0], guest: fwd[1], host: fwd[2]
+    end
+    net.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
+  end
+
+  privkey_install = lambda do |pk, filename|
+    FileUtils.copy(File.expand_path("~/.vagrant.d/#{filename}"), ".")
+    pk.vm.provision "shell", inline: "mkdir -p ~/.ssh; cp /vagrant/#{filename} ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa"
+  end
+
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.define :master, primary: true do |master_conf|
     vmname = "master"
     master_conf.vm.host_name = vmname
     master_conf.vm.box = "centos6.5-x86_64"
-    master_conf.vm.network "private_network", ip: "192.168.33.100"
-    master_conf.vm.network "forwarded_port", guest: 8080, host: 8080
+    master_conf.ssh.forward_agent = true
+
     master_conf.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "4096"]
       vb.customize ["modifyvm", :id, "--name", vmname]
+      virtual_netconfig.call(master_conf, "192.168.33.100", [['webui', 8080, 8080]])
     end
-    master_conf.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
+
+    master_conf.vm.provider :aws do |aws, override|
+      override.vm.box = "dummy"
+      override.ssh.username = "root"  # depending on AMI (ec2-user in most cases)
+      override.ssh.pty = true
+      aws.access_key_id = ENV['AWS_ACCESS_KEY']
+      aws.secret_access_key = ENV['AWS_SECRET_KEY']
+      aws.instance_type = "m1.large"
+      aws.security_groups = "default"
+      aws.tags = { 'Name' => vmname }
+      aws.region = "ap-northeast-1"
+      override.ssh.private_key_path = "cs542-test-apnortheast1.pem"  # Change as well when the region is changed.
+      privkey_install.call(override, "cs542-test-apnortheast1.pem")
+      aws.region_config "ap-northeast-1" do |region|
+        region.keypair_name = "cs542-test"
+        region.ami = "ami-9ffa709e"
+      end
+      aws.region_config "us-east-1" do |region|
+        region.keypair_name = "cs542-test"
+        region.ami = "ami-bf5021d6"
+      end
+    end
+
     master_conf.vm.provision "shell", inline: $repository_init_script
     # Automatic server setup!
     master_conf.vm.provision "shell", inline: "yum install -y ambari-server"
@@ -64,12 +100,35 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define vmname.to_sym do |node_conf|
       node_conf.vm.host_name = vmname
       node_conf.vm.box = "centos6.5-x86_64"
-      node_conf.vm.network "private_network", ip: "192.168.33.#{100+i}"
+      node_conf.ssh.forward_agent = true
+
       node_conf.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", "4096"]
         vb.customize ["modifyvm", :id, "--name", vmname]
+        virtual_netconfig.call(node_conf, "192.168.33.#{100+i}", [])
       end
-      node_conf.vm.provision "shell", inline: $hosts_init_script, args: host_ip_list
+
+      node_conf.vm.provider :aws do |aws, override|
+        override.vm.box = "dummy"
+        override.ssh.username = "root"
+        override.ssh.pty = true
+        aws.access_key_id = ENV['AWS_ACCESS_KEY']
+        aws.secret_access_key = ENV['AWS_SECRET_KEY']
+        aws.instance_type = "m1.large"
+        aws.security_groups = "default"
+        aws.tags = { 'Name' => vmname }
+        aws.region = "ap-northeast-1"
+        override.ssh.private_key_path = "cs542-test-apnortheast1.pem"
+        aws.region_config "ap-northeast-1" do |region|
+          region.keypair_name = "cs542-test"
+          region.ami = "ami-9ffa709e"
+        end
+        aws.region_config "us-east-1" do |region|
+          region.keypair_name = "cs542-test"
+          region.ami = "ami-bf5021d6"
+        end
+      end
+
       node_conf.vm.provision "shell", inline: $repository_init_script
     end
   end

@@ -1,11 +1,22 @@
 #! /usr/bin/env expect
-set timeout -1
 spawn ambari-server setup
 sleep 0.5
+set timeout 3
+# SELinux check message
+expect {
+  -re "OK to continue" { send "y\r" }
+  timeout
+}
 expect {
   -re "Customize user account for ambari-server daemon" { send "n\r" }
   -re "run under user 'root'. Change this setting" { send "n\r" }
 }
+# iptables check message
+expect {
+  -re "OK to continue" { send "y\r" }
+  timeout
+}
+set timeout -1
 expect {
   -re "Do you accept the Oracle Binary Code License Agreement" { send "y\r" }
   -re "Would you like to re-download the JDK" { send "y\r" }
