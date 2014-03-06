@@ -6,16 +6,21 @@ VAGRANTFILE_API_VERSION = "2"
 
 # The number of nodes except the master
 # (# total deployed VMs = NUM_NODES + 1)
-NUM_NODES = 2
+NUM_NODES = 1
 
 $repository_init_script = <<SCRIPT
 yum install -y wget expect
 cd /etc/yum.repos.d/
 wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.4.4.23/ambari.repo
 yum repolist
+export _JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"
+echo 'export _JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"' >> ~/.profile
+SCRIPT
+
+$ambari_agent_init_script = <<SCRIPT
 yum install -y ambari-agent
 cd /vagrant
-python ambari_agent_init.py
+python ambari_agent_init.py %s
 ambari-agent start
 SCRIPT
 
@@ -60,11 +65,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master_conf.vm.host_name = vmname
     master_conf.vm.box = "centos6.5-x86_64"
     master_conf.ssh.forward_agent = true
+    master_conf.vm.provision "shell", inline: $repository_init_script
 
-    master_conf.vm.provider :virtualbox do |vb|
+    master_conf.vm.provider :virtualbox do |vb, override|
       vb.customize ["modifyvm", :id, "--memory", "4096"]
       vb.customize ["modifyvm", :id, "--name", vmname]
       virtual_netconfig.call(master_conf, "192.168.33.100", [['webui', 8080, 8080]])
+      override.vm.provision "shell", inline: $ambari_agent_init_script % 'master'
     end
 
     master_conf.vm.provider :aws do |aws, override|
@@ -79,6 +86,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.region = "ap-northeast-1"
       override.ssh.private_key_path = "cs542-test-apnortheast1.pem"  # Change as well when the region is changed.
       privkey_install.call(override, "cs542-test-apnortheast1.pem")
+      override.vm.provision "shell", inline: $ambari_agent_init_script % ''
       aws.region_config "ap-northeast-1" do |region|
         region.keypair_name = "cs542-test"
         region.ami = "ami-9ffa709e"
@@ -89,7 +97,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
     end
 
-    master_conf.vm.provision "shell", inline: $repository_init_script
     # Automatic server setup!
     master_conf.vm.provision "shell", inline: "yum install -y ambari-server"
     master_conf.vm.provision "shell", inline: "expect /vagrant/ambari_server_init.expect"
@@ -101,11 +108,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node_conf.vm.host_name = vmname
       node_conf.vm.box = "centos6.5-x86_64"
       node_conf.ssh.forward_agent = true
+      node_conf.vm.provision "shell", inline: $repository_init_script
 
-      node_conf.vm.provider :virtualbox do |vb|
+      node_conf.vm.provider :virtualbox do |vb, override|
         vb.customize ["modifyvm", :id, "--memory", "4096"]
         vb.customize ["modifyvm", :id, "--name", vmname]
         virtual_netconfig.call(node_conf, "192.168.33.#{100+i}", [])
+        override.vm.provision "shell", inline: $ambari_agent_init_script % 'master'
       end
 
       node_conf.vm.provider :aws do |aws, override|
@@ -119,6 +128,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         aws.tags = { 'Name' => vmname }
         aws.region = "ap-northeast-1"
         override.ssh.private_key_path = "cs542-test-apnortheast1.pem"
+        override.vm.provision "shell", inline: $ambari_agent_init_script % ''
         aws.region_config "ap-northeast-1" do |region|
           region.keypair_name = "cs542-test"
           region.ami = "ami-9ffa709e"
@@ -129,7 +139,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
-      node_conf.vm.provision "shell", inline: $repository_init_script
     end
   end
 
