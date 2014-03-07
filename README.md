@@ -14,6 +14,7 @@ VirtualBox Guide
  - Now you can connect to the master node via `http://127.0.0.1:8080` to continue with Ambari setup.  
    It is recommended to modify your `/etc/hosts` (`C:\Windows\System32\drivers\etc\hosts` for Windows) to map `master` with `127.0.0.1` and connect to the Ambari setup by `http://master:8080`.
  - Ambari setup:
+   - Type `master`, `node1`, ..., `nodeN` (where N is `NUM_NODES`) in the node list.
    - Choose manual installation of Ambari agents instead of uploading the private key. They are automatically installed during the provisioning process.
    - Use "vagrant" for the user account name.
 
