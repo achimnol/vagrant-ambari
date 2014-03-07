@@ -65,6 +65,6 @@ How to use SSH to the master machine
 What happens under the hood of `vagrant up`
 -------------------------------------------
 
-The Vagrant script automatically configures Hortonworks yum repositories and install ambari-server/agent.  For AWS, installation of ambari-agent is skipped because auto-installation by ambari-server works well without manual touches to the agent configurations (which is written in `ambari_server_init.py`.  To install the ambari-server automatically, it uses a `expect` script named `ambari_server_init.expect`.  Actual deployments of virtual machines and provisioning is handled by Vagrant.
+The Vagrant script automatically configures Hortonworks yum repositories and install ambari-server/agent.  For AWS, installation of ambari-agent is skipped because auto-installation by ambari-server works well without manual touches to the agent configurations (which is written in `ambari_server_init.py`).  To install the ambari-server automatically, it uses a `expect` script named `ambari_server_init.expect`.  The script also tries to disable `iptables` (which is on by default in CentOS AMI and only allows 22 port inbound connections only).  Actual deployments of virtual machines and provisioning is handled by Vagrant.
 
 For VirtualBox, the root `/vagrant` directory is directly synchronized with the current working directory (where `Vagrant` file exists).  For AWS, vagrant uses `rsync` to copy files in the current working directory to `/vagrant` directory of each instance.
