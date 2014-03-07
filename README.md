@@ -30,7 +30,7 @@ Amazon AWS Guide
  - Register your AWS access key and secret key to the environment variables named `AWS_ACCESS_KEY` and `AWS_SECRET_KEY`.
    For Linux/Mac users, use `export` command. For Windows users, use `set` command.
  - AWS configurations:
-   - Store your private key generated from the AWS console in `~/.vagrant.d/`.
+   - Store your private key (`.pem` file) generated from the AWS console in `~/.vagrant.d/`.
    - Configure a security group that allows external SSH (port 22) and HTTP (port 8080) inbound connections.
  - Customize `Vagrant` configuration:
    - Check the region where you provision the instances.
