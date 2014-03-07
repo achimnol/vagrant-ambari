@@ -24,7 +24,7 @@ VirtualBox Guide
 Amazon AWS Guide
 ----------------
 
- - Install cygwin with OpenSSH and rsync packages.  Ensure that they are available from the command prompt.
+ - Install cygwin with **OpenSSH** and **rsync** packages.  Ensure that they are available from the command prompt by adding cygwin's bin directory to the `PATH` environment variable.
  - Install vagrant-aws plugin by `vagrant plugin install vagrant-aws`.
  - For KAIST users:
    - Increase the sleep delay from 2 to 11 between SSH connection tests in `run_instance.rb` and `start_instance.rb` at the directory `~/.vagrant.d/gems/gems/vagrant-aws-0.4.1/lib/vagrant-aws/action`.
@@ -37,7 +37,7 @@ Amazon AWS Guide
    - Store your private key (`.pem` file) generated from the AWS console in `~/.vagrant.d/`.
    - Configure a security group that allows external SSH (port 22) and HTTP (port 8080) inbound connections.
  - Customize `Vagrant` configuration:
-   - Check the region where you provision the instances.
+   - Check the region where you provision the instances. The default is `ap-northeast-1` because it has the lowest latency from South Korea. :)
    - Change the security group name. The default is `default`.
    - Change the key filenames and keypair name.
    - Change the number of nodes defined as `NUM_NODES`.
