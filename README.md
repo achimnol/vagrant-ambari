@@ -6,7 +6,7 @@ This project is a set of scripts to deploy Apache Ambari on VirtualBox and Amazo
 Some references
 ---------------
 
- * [Vagrant](https://github.com/mitchellh/vagrant)
+ * [Vagrant](https://github.com/mitchellh/vagrant) with [its docs](https://docs.vagrantup.com/v2/)
  * [Vagrant-AWS](https://github.com/mitchellh/vagrant-aws)
  * [Apache Ambrai](https://ambari.apache.org/)
 
