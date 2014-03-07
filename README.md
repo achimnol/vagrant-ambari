@@ -14,9 +14,11 @@ VirtualBox Guide
  - Now you can connect to the master node via `http://127.0.0.1:8080` to continue with Ambari setup.  
    It is recommended to modify your `/etc/hosts` (`C:\Windows\System32\drivers\etc\hosts` for Windows) to map `master` with `127.0.0.1` and connect to the Ambari setup by `http://master:8080`.
  - Ambari setup:
+   - Check only the CentOS 6 repository.
    - Type `master`, `node1`, ..., `nodeN` (where N is `NUM_NODES`) in the node list.
    - Choose manual installation of Ambari agents instead of uploading the private key. They are automatically installed during the provisioning process.
    - Use "vagrant" for the user account name.
+ - La Voila! Now you have a running Hadoop/Hive/Pig cluster on your desktop (or whatever that VirtualBox is running on).
 
 Amazon AWS Guide
 ----------------
@@ -42,9 +44,11 @@ Amazon AWS Guide
  - Run `vagrant up --provider=aws` and wait for all procedures to complete.
  - Now you can connect to the master node via `http://{master's public ip}:8080/` to continue with Ambari setup.
  - Ambari setup:
+   - Check only the CentOS 6 repository.
    - Type FQDN of *internal* host names in the node list, for example: `ip-172-31-xx-xx.ap-northeast-1.compute.internal`.
    - Choose automatic installation via SSH and upload the private key.
    - Use "root" for the user account name.
+ - La Voila! Now you have a running Hadoop/Hive/Pig cluster on AWS.
 
 How to use SSH to the master machine
 -----------------------------------
