@@ -8,7 +8,7 @@ Some references
 
  * [Vagrant](https://github.com/mitchellh/vagrant) with [its docs](https://docs.vagrantup.com/v2/)
  * [Vagrant-AWS](https://github.com/mitchellh/vagrant-aws)
- * [Apache Ambrai](https://ambari.apache.org/)
+ * [Apache Ambari](https://ambari.apache.org/)
 
 VirtualBox Guide
 ----------------
