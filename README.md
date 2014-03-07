@@ -1,7 +1,7 @@
 vagrant-ambari
 ==============
 
-This project is a set of scripts to deploy Apache Ambari on VirtualBox and Amazon AWS.
+This project is a set of scripts to deploy Apache Ambari on VirtualBox and Amazon AWS.  These scripts are designed for development and testing only.  For production, you need to change many parts for security, such as use of root accounts to run all daemons!
 
 VirtualBox Guide
 ----------------
