@@ -33,7 +33,8 @@ Amazon AWS Guide
    - Configure a security group that allows external SSH (port 22) and HTTP (port 8080) inbound connections.
  - Customize `Vagrant` configuration:
    - Check the region where you provision the instances.
-   - Change the key filenames according to the step above.
+   - Change the security group name. The default is `default`.
+   - Change the key filenames and keypair name.
    - Change the number of nodes defined as `NUM_NODES`.
    - If you want, you may change the instance type and AMI. The default instance type is `m1.large`.
      The default AMI image is CentOS 6.4 official release from the AWS marketplace.
