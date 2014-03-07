@@ -6,13 +6,13 @@ This project is a set of scripts to deploy Apache Ambari on VirtualBox and Amazo
 VirtualBox Guide
 ----------------
 
-Prerequisites:
-
  - Prepare CentOS 64bit box using `vagrant box add centos6.5-x86_64 https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box`
-   You can find other boxes in http://www.vagrantbox.es/ .
+   You can find other boxes in http://www.vagrantbox.es/ but we currently support CentOS 6 only.
+ - Customize `Vagrant` configuration:
+   - Change the number of nodes defined as `NUM_NODES`. Be aware that each VM uses 4GB of RAM!
  - Run `vagrant up` and wait for all procedures to complete.
- - Now you can connect to the master node via `http://127.0.0.1:8080` to continue with Ambari setup.
-   It is recommended to modify your `/etc/hosts` (`C:\Windows\System32\drivers\etc\hosts` for Windows) to map `master` with `127.0.0.1`.
+ - Now you can connect to the master node via `http://127.0.0.1:8080` to continue with Ambari setup.  
+   It is recommended to modify your `/etc/hosts` (`C:\Windows\System32\drivers\etc\hosts` for Windows) to map `master` with `127.0.0.1` and connect to the Ambari setup by `http://master:8080`.
  - Ambari setup:
    - Choose manual installation of Ambari agents instead of uploading the private key. They are automatically installed during the provisioning process.
    - Use "vagrant" for the user account name.
@@ -31,7 +31,7 @@ Amazon AWS Guide
  - AWS configurations:
    - Store your private key generated from the AWS console in `~/.vagrant.d/`.
    - Configure a security group that allows external SSH (port 22) and HTTP (port 8080) inbound connections.
- - Change `Vagrant` configuration:
+ - Customize `Vagrant` configuration:
    - Check the region where you provision the instances.
    - Change the key filenames according to the step above.
    - Change the number of nodes defined as `NUM_NODES`.
@@ -41,12 +41,14 @@ Amazon AWS Guide
  - Now you can connect to the master node via `http://{master's public ip}:8080/` to continue with Ambari setup.
  - Ambari setup:
    - Type FQDN of *internal* host names in the node list, for example: `ip-172-31-xx-xx.ap-northeast-1.compute.internal`.
-   - Choose automatic installation and upload the private key.
+   - Choose automatic installation via SSH and upload the private key.
    - Use "root" for the user account name.
 
-How to use SSH to the mater machine
+How to use SSH to the master machine
 -----------------------------------
 
  - You need to specify the SSH private key depending on your SSH client.
    - For PuTTY, use PuTTYGen to convert OpenSSL private key into PuTTY private key (ppk) without passphrase protection. And then add this key to Pageant.
    - For command line SSH, use `ssh -i {keyfilename} {master's ip}` command.
+ - In VirtualbBox, the master's default SSH port is mapped to 2222. node1 is mapped to 2200, node2 to 2201, ..., so on.
+ - In Amazon, you can use the plain SSH port 22.
