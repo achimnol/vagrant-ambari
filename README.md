@@ -14,6 +14,7 @@ VirtualBox Guide
  - Now you can connect to the master node via `http://127.0.0.1:8080` to continue with Ambari setup.  
    It is recommended to modify your `/etc/hosts` (`C:\Windows\System32\drivers\etc\hosts` for Windows) to map `master` with `127.0.0.1` and connect to the Ambari setup by `http://master:8080`.
  - Ambari setup:
+   - The default account is admin / admin.
    - Check only the CentOS 6 repository.
    - Type `master`, `node1`, ..., `nodeN` (where N is `NUM_NODES`) in the node list.
    - Choose manual installation of Ambari agents instead of uploading the private key. They are automatically installed during the provisioning process.
@@ -23,6 +24,7 @@ VirtualBox Guide
 Amazon AWS Guide
 ----------------
 
+ - Install cygwin with OpenSSH and rsync packages.  Ensure that they are available from the command prompt.
  - Install vagrant-aws plugin by `vagrant plugin install vagrant-aws`.
  - For KAIST users:
    - Increase the sleep delay from 2 to 11 between SSH connection tests in `run_instance.rb` and `start_instance.rb` at the directory `~/.vagrant.d/gems/gems/vagrant-aws-0.4.1/lib/vagrant-aws/action`.
@@ -44,6 +46,7 @@ Amazon AWS Guide
  - Run `vagrant up --provider=aws` and wait for all procedures to complete.
  - Now you can connect to the master node via `http://{master's public ip}:8080/` to continue with Ambari setup.
  - Ambari setup:
+   - The default account is admin / admin.
    - Check only the CentOS 6 repository.
    - Type FQDN of *internal* host names in the node list, for example: `ip-172-31-xx-xx.ap-northeast-1.compute.internal`.
    - Choose automatic installation via SSH and upload the private key.
@@ -51,10 +54,17 @@ Amazon AWS Guide
  - La Voila! Now you have a running Hadoop/Hive/Pig cluster on AWS.
 
 How to use SSH to the master machine
------------------------------------
+------------------------------------
 
  - You need to specify the SSH private key depending on your SSH client.
    - For PuTTY, use PuTTYGen to convert OpenSSL private key into PuTTY private key (ppk) without passphrase protection. And then add this key to Pageant.
    - For command line SSH, use `ssh -i {keyfilename} {master's ip}` command.
  - In VirtualbBox, the master's default SSH port is mapped to 2222. node1 is mapped to 2200, node2 to 2201, ..., so on.
  - In Amazon, you can use the plain SSH port 22.
+
+What happens under the hood of `vagrant up`
+-------------------------------------------
+
+The Vagrant script automatically configures Hortonworks yum repositories and install ambari-server/agent.  For AWS, installation of ambari-agent is skipped because auto-installation by ambari-server works well without manual touches to the agent configurations (which is written in `ambari_server_init.py`.  To install the ambari-server automatically, it uses a `expect` script named `ambari_server_init.expect`.  Actual deployments of virtual machines and provisioning is handled by Vagrant.
+
+For VirtualBox, the root `/vagrant` directory is directly synchronized with the current working directory (where `Vagrant` file exists).  For AWS, vagrant uses `rsync` to copy files in the current working directory to `/vagrant` directory of each instance.
