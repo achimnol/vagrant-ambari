@@ -14,14 +14,13 @@ cd /etc/yum.repos.d/
 wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.4.4.23/ambari.repo
 yum repolist
 export _JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"
-echo 'export _JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"' >> ~/.profile
+echo 'export _JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"' >> /etc/profile
 SCRIPT
 
 $ambari_agent_init_script = <<SCRIPT
 yum install -y ambari-agent
 cd /vagrant
 python ambari_agent_init.py %s
-ambari-agent start
 SCRIPT
 
 $hosts_init_script = <<SCRIPT
@@ -86,7 +85,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.region = "ap-northeast-1"
       override.ssh.private_key_path = "cs542-test-apnortheast1.pem"  # Change as well when the region is changed.
       privkey_install.call(override, "cs542-test-apnortheast1.pem")
-      override.vm.provision "shell", inline: $ambari_agent_init_script % ''
       aws.region_config "ap-northeast-1" do |region|
         region.keypair_name = "cs542-test"
         region.ami = "ami-9ffa709e"
@@ -100,6 +98,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Automatic server setup!
     master_conf.vm.provision "shell", inline: "yum install -y ambari-server"
     master_conf.vm.provision "shell", inline: "expect /vagrant/ambari_server_init.expect"
+    master_conf.vm.provision "shell", inline: "[ -f /etc/init.d/iptables ] && /etc/init.d/iptables stop || echo 'Skipping clean up of iptables...'"
+    master_conf.vm.provision "shell", inline: "ambari-server start"
   end
 
   (1..NUM_NODES).each do |i|
@@ -128,7 +128,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         aws.tags = { 'Name' => vmname }
         aws.region = "ap-northeast-1"
         override.ssh.private_key_path = "cs542-test-apnortheast1.pem"
-        override.vm.provision "shell", inline: $ambari_agent_init_script % ''
         aws.region_config "ap-northeast-1" do |region|
           region.keypair_name = "cs542-test"
           region.ami = "ami-9ffa709e"
@@ -138,6 +137,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           region.ami = "ami-bf5021d6"
         end
       end
+
+      node_conf.vm.provision "shell", inline: "[ -f /etc/init.d/iptables ] && /etc/init.d/iptables stop || echo 'Skipping clean up of iptables...'"
 
     end
   end
