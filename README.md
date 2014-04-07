@@ -26,6 +26,8 @@ VirtualBox Guide
    - Type `master`, `node1`, ..., `nodeN` (where N is `NUM_NODES`) in the node list.
    - Choose manual installation of Ambari agents instead of uploading the private key. They are automatically installed during the provisioning process.
    - Use "vagrant" for the user account name.
+   - Choose only HDFS, Yarn + MapReduce2, Nagios, Ganglia, ZooKeeper services.
+   - Follow the on-screen instructions.
  - La Voila! Now you have a running Hadoop/Hive/Pig cluster on your desktop (or whatever that VirtualBox is running on).
 
 Amazon AWS Guide
