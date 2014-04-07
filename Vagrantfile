@@ -21,6 +21,7 @@ $ambari_agent_init_script = <<SCRIPT
 yum install -y ambari-agent
 cd /vagrant
 python ambari_agent_init.py %s
+ambari-agent start
 SCRIPT
 
 $hosts_init_script = <<SCRIPT
